@@ -48,8 +48,8 @@ class MissedApex(Overlay):
         super().__init__(window_name, refresh_rate)
 
         mixer.init()
-        self.sound = mixer.Sound("beep.wav")
-        # self.sound = mixer.Sound("./yamete-kudasai.wav") # need to get stuck in the limiter for 3s though
+        self.sound = mixer.Sound("Sounds/beep.wav")
+        # self.sound = mixer.Sound("Sounds/yamete-kudasai.wav") # need to get stuck in the limiter for 3s though
         self.sound.set_volume(0.15)
         self.channel = mixer.Channel(0)
 
