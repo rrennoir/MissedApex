@@ -53,37 +53,49 @@ class MissedApex(Overlay):
         self.sound.set_volume(0.15)
         self.channel = mixer.Channel(0)
 
-        self.create_rev_light(10, 200, 10)
+        self.segment_color_table = []
+        self.segment_pos = []
+        self.segment_count = 10
+        self.segment_color = [(4, Color.GREEN), (2, Color.YELLOW), (2, Color.ORANGE), (2, Color.RED)]
+        self.create_rev_light(10, 200)
 
 
-    def create_rev_light(self, x:int, y:int, segments: int) -> None:
+    def create_rev_light(self, x:int, y:int) -> None:
 
         Xoffset = 10
         Xsize = 50
         Ysize = 10
         current_offset = 0
 
-        self.segment_pos = []
-        self.segment_count = segments
-        self.segment_color = [(4, Color.GREEN), (2, Color.YELLOW), (2, Color.ORANGE), (2, Color.RED)]
-        for i in range(self.segment_count):
+        self.create_segment_color_table()
+
+        for _ in range(self.segment_count):
             self.segment_pos.append(Vector(x + current_offset, y, Xsize, Ysize))
             current_offset += Xsize + Xoffset
 
 
+    def create_segment_color_table(self) -> None:
+
+        for i in self.segment_color:
+            for _ in range(i[0]):
+                self.segment_color_table.append(i[1])
+
+
     def draw_rev_light(self, rpm: int) -> None:
+        # hardcoded for honda
         heighest_rpm = 7500
         lowest_rpm = 6000
+        
         rpm_step = (heighest_rpm - lowest_rpm) // self.segment_count
         rpm_segment = [i for i in range(6000 + rpm_step, 7500 + 1, rpm_step)]
 
         for index, segment in enumerate(self.segment_pos):
             
             if rpm > rpm_segment[index]:
-                color = Color.GREEN
+                color = self.segment_color_table[index]
             
             else:
-                color = Color.RED
+                color = Color.BLACK
 
             self.draw("fillRect", segment, color.value)
 
@@ -106,6 +118,7 @@ def main():
     app = MissedApex("AC2", 60)
     font = app.CreateFont("Fixedsys", 100)
 
+    # CTRL + 0 (numpad) to close
     while not(is_key_pressed(KeyCode.CTRL_L) and is_key_pressed(KeyCode.NUM_0)):
         OnUpdate(asm, app, font)
 
