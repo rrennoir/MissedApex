@@ -1,0 +1,7 @@
+{
+    "carID": 21,
+    "rpm_shift_range": 7500,
+    "exit_shift_range": 7000,
+    "lowest_rpm_segment": 6000,
+    "segment_rpm": []
+}
