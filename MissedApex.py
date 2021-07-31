@@ -182,8 +182,11 @@ class MissedApex(Overlay):
             "porsche_718_cayman_gt4_mr": 61
         }
 
+        # 'lamborghini_huracan_gt3_evo\x00\x00\x00\x00\x00\x00'
+        # ['lamborghini_huracan_gt3_evo', '', '', '', '', '', '']
+        car_name = car_name.split("\x00")[0]
         for name in name_ids.keys():
-            if car_name.startswith(name):
+            if car_name == name:
                 return name_ids[name]
 
 
