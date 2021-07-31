@@ -61,7 +61,7 @@ class MissedApex(Overlay):
         self.segment_color_table = self.create_segment_color_table()
 
         self.cars_infos = self.load_cars_infos()
-        self.create_rev_light(10, 200)
+        self.create_rev_light(10, 600)
         self._current_carID = -1
 
     @property
@@ -115,9 +115,11 @@ class MissedApex(Overlay):
 
         return segment_color_table
 
-    def draw_rev_light(self, rpm: int) -> None:
+    def draw_rev_light(self, rpm: int, gas: float) -> None:
 
-        if self.cars_infos[self.current_carID]["rpm_shift_range"] <= rpm:
+        car_info = self.cars_infos[self.current_carID]
+
+        if car_info["rpm_shift_range"] <= rpm:
             for segment in self.segment_pos:
                 self.draw("fillRect", segment, Color.BLUE.value)
 
@@ -131,6 +133,12 @@ class MissedApex(Overlay):
                     color = Color.BLACK
 
                 self.draw("fillRect", segment, color.value)
+
+        if rpm >= car_info["rpm_shift_range"] and gas == 1.0:
+            self.beep()
+            
+        elif (rpm <= car_info["exit_shift_range"]):
+            self.stop_sound()
 
     def beep(self) -> None:
         if not self.channel.get_busy():
@@ -228,13 +236,7 @@ def OnUpdate(asm: accSharedMemory, overlay: MissedApex, font):
             overlay.draw("Text", queueVec, Color.BLUE.value,
                             text=f"Queue: {asm.get_queue_size()} items", fontObject=font)
 
-            overlay.draw_rev_light(rpm)
-
-            if rpm >= 7500 and gas == 1.0:
-                overlay.beep()
-            
-            elif (rpm <= 7000):
-                overlay.stop_sound()
+            overlay.draw_rev_light(rpm, gas)
            
 
     overlay.handle()
