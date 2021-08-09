@@ -1,3 +1,6 @@
 [submodule "SharedMemory"]
 	path = SharedMemory
 	url = https://github.com/rrennoir/PyAccSharedMemory.git
+[submodule "UdpInterface"]
+	path = UdpInterface
+	url = https://github.com/rrennoir/PyAccUdpInterface.git
