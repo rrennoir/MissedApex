@@ -4,6 +4,7 @@ import os
 
 from PyOverlay import *
 from SharedMemory.PyAccSharedMemory import *
+from UdpInterface.PyAccUdpInterface import accUpdInterface
 from keycode import KeyCode
 
 from pygame import mixer
@@ -191,6 +192,7 @@ class MissedApex(Overlay):
         }
 
         # 'lamborghini_huracan_gt3_evo\x00\x00\x00\x00\x00\x00'
+        # to
         # ['lamborghini_huracan_gt3_evo', '', '', '', '', '', '']
         car_name = car_name.split("\x00")[0]
         for name in name_ids.keys():
@@ -200,26 +202,42 @@ class MissedApex(Overlay):
 
 def main():
 
+    udp_info = {
+        "name": "Ryan Rennoir",
+        "password": "asd",
+        "speed": 250,
+        "cmd_password": ""
+    }
+
     asm = accSharedMemory()
+    aui = accUpdInterface("127.0.0.1", 9000, udp_info)
+
     if not asm.start():
         print("Fucked up")
+
+    aui.start()
 
     app = MissedApex("AC2", 60)
     font = app.CreateFont("Fixedsys", 100)
 
     # CTRL + 0 (numpad) to close
     while not(is_key_pressed(KeyCode.CTRL_L) and is_key_pressed(KeyCode.NUM_0)):
-        OnUpdate(asm, app, font)
+        OnUpdate(asm, aui, app, font)
 
+    aui.stop()
     asm.stop()
 
 
-def OnUpdate(asm: accSharedMemory, overlay: MissedApex, font):
+def OnUpdate(asm: accSharedMemory, aui: accUpdInterface, overlay: MissedApex, font):
 
     borderVec = Vector(0, 0, 1280, 720)
     queueVec = Vector(10, 100, 200, 50)
+    udpVec1 = Vector(10, 200, 200, 50)
+    udpVec2 = Vector(10, 300, 200, 50)
+    info_font = overlay.CreateFont("Fixedsys", 50)
 
     sm = asm.get_sm_data()
+    udp_data = aui.udp_data
 
     if sm and sm["physics"] and sm["graphics"]:
 
@@ -236,9 +254,16 @@ def OnUpdate(asm: accSharedMemory, overlay: MissedApex, font):
             overlay.draw("Text", queueVec, Color.BLUE.value,
                             text=f"Queue: {asm.get_queue_size()} items", fontObject=font)
 
+            if udp_data:
+                overlay.draw("Text", udpVec1, Color.GREEN.value,
+                            text=f"Connection ID: {udp_data['connection']['id']}", fontObject=font)
+                
+                if len(udp_data["entries"]) > 0:
+                    overlay.draw("Text", udpVec2, Color.GREEN.value,
+                                text=f"Driver 0 current lap: {udp_data['entries'][0]['current_lap']}", fontObject=info_font)
+
             overlay.draw_rev_light(rpm, gas)
            
-
     overlay.handle()
 
 
